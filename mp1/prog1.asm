@@ -94,55 +94,57 @@ GET_NEXT
 	ADD R1,R1,#1		; point to next character in string
 	BRnzp COUNTLOOP		; go to start of counting loop
 
-	; x3F00 # for @ (16 bit binary)
-	; x3F01-x3F1A  # for A-Z (16 bit binary)
-	; write a while loop starting from 40 to 5A (ASCII), 0ffset =40
-	; x4000 string start
-	; 
-	; def Binary to hex(SR):
-	;	counter = 16
-	;	get SR
-	; 	if SR < 0:
-	;	DR + 8
-	; 	counter - 1
-	; 	SR += SR
-	; 	if SR < 0:
-	;	DR + 4
-	; 	counter - 1
-	; 	SR += SR
-	; 	if SR < 0:
-	;	DR + 2
-	; 	counter - 1
-	; 	SR += SR
-	; 	if SR < 0:
-	;	DR + 1
-	; 	counter - 1
-	;	if DR - 10 < 0:
-	;	DR += 48 dec 30 hex
-	;	print
-	; 	if DR - 10 >= 0:
-	; 	DR += 65 dec 41 hex
-	;	print
-	; 	SR += SR
-	;	if counter > 0:
-	; 		branch back to start
+; x3F00 # for @ (16 bit binary)
+; x3F01-x3F1A  # for A-Z (16 bit binary)
+; write a while loop starting from 40 to 5A (ASCII), 0ffset =40
+; x4000 string start
+; 
+; def Binary to hex(SR):
+;	counter = 16
+;	DR = 0
+;	get SR
+; 	if SR < 0:
+;	DR += 8
+; 	counter - 1
+; 	SR += SR
+; 	if SR < 0:
+;	DR += 4
+; 	counter - 1
+; 	SR += SR
+; 	if SR < 0:
+;	DR += 2
+; 	counter - 1
+; 	SR += SR
+; 	if SR < 0:
+;	DR += 1
+; 	counter - 1
+;	if DR - 10 < 0:
+;	DR += 48 dec 30 hex
+;	print DR
+; 	if DR - 10 >= 0:
+; 	DR += 65 dec 41 hex
+;	print DR
+; 	SR += SR
+;	if counter > 0:
+; 		branch back to start
 
-	; if name == main:
-	; 	while offset - 5A < 0: (BRn)
-	;   	print leading char (offset)
-	;		print space
-	; 		load memory addr (SR) = offset-40+x3F00
-	; 		BinaryToHex(SR)
-	;		print newline
+; if name == main:
+; 	while offset - 5A < 0: (BRn)
+;   	print leading char (offset)
+;		print space
+; 		load memory addr (SR) = offset-40+x3F00
+; 		BinaryToHex(SR)
+;		print newline
 	
-	;	print | counter | SR | DR | offset | x3F00 | temp | X  |
-	;   R0	  | R1      | R2 | R3 | R4     | R5    | R6   | R7 |
+;	print | counter | SR | DR | offset | x3F00 | temp | X  |
+;   R0	  | R1      | R2 | R3 | R4     | R5    | R6   | R7 |
 
-BIN_TO_HEX
+BIN_TO_HEX				; function definition, intakes 
 	AND R1, R1, #0
 	ADD R1, R1, #8
 	ADD R1, R1, #8
 BIN_TO_HEX_START
+	AND R3, R3, #0
 	AND R2, R2, R2
 	BRzp SKIP8
 	ADD R3, R3, #8
@@ -163,13 +165,14 @@ SKIP2
 	ADD R3, R3, #1
 SKIP1
 	ADD R1, R1, #-1
-	ADD R2, R2, R2
+        ADD R2, R2, R2
 	ADD R6, R3, #-10
 	BRn SKIP65
 	LD R6, HEX41
-	ADD R0, R3, R6 			
-	OUT
-	BRnzp NEXT
+        ADD R6,R6,#-10
+	ADD R0, R3, R6 		
+        OUT
+        BRnzp NEXT
 SKIP65
 	LD R6, HEX30
 	ADD R0, R3, R6 			
