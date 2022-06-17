@@ -94,9 +94,131 @@ GET_NEXT
 	ADD R1,R1,#1		; point to next character in string
 	BRnzp COUNTLOOP		; go to start of counting loop
 
+	; x3F00 # for @ (16 bit binary)
+	; x3F01-x3F1A  # for A-Z (16 bit binary)
+	; write a while loop starting from 40 to 5A (ASCII), 0ffset =40
+	; x4000 string start
+	; 
+	; def Binary to hex(SR):
+	;	counter = 16
+	;	get SR
+	; 	if SR < 0:
+	;	DR + 8
+	; 	counter - 1
+	; 	SR += SR
+	; 	if SR < 0:
+	;	DR + 4
+	; 	counter - 1
+	; 	SR += SR
+	; 	if SR < 0:
+	;	DR + 2
+	; 	counter - 1
+	; 	SR += SR
+	; 	if SR < 0:
+	;	DR + 1
+	; 	counter - 1
+	;	if DR - 10 < 0:
+	;	DR += 48 dec 30 hex
+	;	print
+	; 	if DR - 10 >= 0:
+	; 	DR += 65 dec 41 hex
+	;	print
+	; 	SR += SR
+	;	if counter > 0:
+	; 		branch back to start
 
+	; if name == main:
+	; 	while offset - 5A < 0: (BRn)
+	;   	print leading char (offset)
+	;		print space
+	; 		load memory addr (SR) = offset-40+x3F00
+	; 		BinaryToHex(SR)
+	;		print newline
+	
+	;	print | counter | SR | DR | offset | x3F00 | temp | X  |
+	;   R0	  | R1      | R2 | R3 | R4     | R5    | R6   | R7 |
 
+BIN_TO_HEX
+	AND R1, R1, #0
+	ADD R1, R1, #8
+	ADD R1, R1, #8
+BIN_TO_HEX_START
+	AND R2, R2, R2
+	BRzp SKIP8
+	ADD R3, R3, #8
+SKIP8
+	ADD R1, R1, #-1
+	ADD R2, R2, R2
+	BRzp SKIP4
+	ADD R3, R3, #4
+SKIP4
+	ADD R1, R1, #-1
+	ADD R2, R2, R2
+	BRzp SKIP2
+	ADD R3, R3, #2
+SKIP2
+	ADD R1, R1, #-1
+	ADD R2, R2, R2
+	BRzp SKIP1
+	ADD R3, R3, #1
+SKIP1
+	ADD R1, R1, #-1
+	ADD R2, R2, R2
+	ADD R6, R3, #-10
+	BRn SKIP65
+	LD R6, HEX41
+	ADD R0, R3, R6 			
+	OUT
+	BRnzp NEXT
+SKIP65
+	LD R6, HEX30
+	ADD R0, R3, R6 			
+	OUT
+NEXT
+	AND R1, R1, R1
+	BRp BIN_TO_HEX_START
+	LD R0, ENTER
+	OUT
+	BRnzp RESUME
+	
 PRINT_HIST
+	AND R0, R0, #0		; init
+	AND R1, R1, #0		;
+	AND R2, R2, #0		;
+	AND R3, R3, #0		;
+	LD  R4, HEX41		;
+	ADD R4, R4, #-1		;
+	LD  R5, HIST_ADDR	;
+	AND R6, R6, #0		;
+	AND R7, R7, #0		;
+LOOP_BACK
+	AND R0, R0, #0		; init
+	AND R1, R1, #0		;
+	AND R2, R2, #0		;
+	AND R3, R3, #0		;
+	; R4 NOT INCLUDED
+	; R5 NOT INCLUDED
+	AND R6, R6, #0		;
+	AND R7, R7, #0		;
+	ADD R0, R4, #0		; print first ascii
+	OUT					;
+	LD R0, SPACE		;
+	OUT					;
+	LD R6, HEX3EC0		;
+	ADD R6, R4, R6		; 
+	LDR R2, R6, #0		; sr definition
+	BRnzp BIN_TO_HEX	; function call
+
+RESUME
+	ADD R4, R4, #1		; WHILE mechenism
+	LD  R6, HEXM5A		;
+	ADD R6, R4, R6		;
+	BRnz LOOP_BACK		; 
+	BRnzp DONE			; done
+
+
+
+
 
 ; you will need to insert your code to print the histogram here
 
@@ -114,8 +236,19 @@ NUM_BINS	.FILL #27	; 27 loop iterations
 NEG_AT		.FILL xFFC0	; the additive inverse of ASCII '@'
 AT_MIN_Z	.FILL xFFE6	; the difference between ASCII '@' and 'Z'
 AT_MIN_BQ	.FILL xFFE0	; the difference between ASCII '@' and '`'
-HIST_ADDR	.FILL x3F00     ; histogram starting address
+HIST_ADDR	.FILL x3F00 ; histogram starting address
 STR_START	.FILL x4000	; string starting address
+HEX30		.FILL x0030 ; hex30
+
+HEX41		.FILL x0041 ; hex41
+HEXM40		.FILL xFFC0 ; -hex40
+HEXM5A		.FILL xFFA6 ; -hex5A
+ENTER		.FILL x000A ; SPACEBAR
+LITTLEX		.FILL x0078	; x
+HEX3EC0		.FILL x3EC0 ; x3F00-x40
+SPACE		.FILL x0020	; space
+
+
 
 ; for testing, you can use the lines below to include the string in this
 ; program...
