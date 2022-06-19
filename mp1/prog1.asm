@@ -139,84 +139,84 @@ GET_NEXT
 ;	print | counter | SR | DR | offset | x3F00 | temp | X  |
 ;   R0	  | R1      | R2 | R3 | R4     | R5    | R6   | R7 |
 
-BIN_TO_HEX				; function definition, intakes 
-	AND R1, R1, #0
-	ADD R1, R1, #8
-	ADD R1, R1, #8
-BIN_TO_HEX_START
-	AND R3, R3, #0
-	AND R2, R2, R2
-	BRzp SKIP8
-	ADD R3, R3, #8
-SKIP8
-	ADD R1, R1, #-1
-	ADD R2, R2, R2
-	BRzp SKIP4
-	ADD R3, R3, #4
-SKIP4
-	ADD R1, R1, #-1
-	ADD R2, R2, R2
-	BRzp SKIP2
-	ADD R3, R3, #2
-SKIP2
-	ADD R1, R1, #-1
-	ADD R2, R2, R2
-	BRzp SKIP1
-	ADD R3, R3, #1
-SKIP1
-	ADD R1, R1, #-1
-        ADD R2, R2, R2
-	ADD R6, R3, #-10
-	BRn SKIP65
-	LD R6, HEX41
-        ADD R6,R6,#-10
-	ADD R0, R3, R6 		
-        OUT
-        BRnzp NEXT
-SKIP65
-	LD R6, HEX30
-	ADD R0, R3, R6 			
+BIN_TO_HEX				; loop is pseudo function definition, intakes R2
+	AND R1, R1, #0		; Init R1 to 16
+	ADD R1, R1, #8		; R1 += 8
+	ADD R1, R1, #8		; R1 += 8
+BIN_TO_HEX_START		; Actual loop portion, skips initialization
+	AND R3, R3, #0		; For each time, clear output register
+	AND R2, R2, R2		; L shift and get CC for R2
+	BRzp SKIP8			; Skips +8 if R2 starts with 0
+	ADD R3, R3, #8		; output += 8 
+SKIP8					;
+	ADD R1, R1, #-1		; decrement counter
+	ADD R2, R2, R2		; L shift and get CC
+	BRzp SKIP4			; Skips +4 if R2 starts with 0
+	ADD R3, R3, #4		; output += 4
+SKIP4					; 
+	ADD R1, R1, #-1		; decrement counter
+	ADD R2, R2, R2		; L shift and get CC
+	BRzp SKIP2			; Skips +2 if R2 starts with 0
+	ADD R3, R3, #2		; output += 2
+SKIP2					;
+	ADD R1, R1, #-1		; decrement counter
+	ADD R2, R2, R2		; L shift and get CC
+	BRzp SKIP1			; Skips +1 if R2 starts with 0
+	ADD R3, R3, #1		; output += 1
+SKIP1					;
+	ADD R1, R1, #-1		; decrement counter
+    ADD R2, R2, R2		; L shift and get CC
+	ADD R6, R3, #-10	; if R3 -10 is less than 0, R3 is higher case
+	BRn SKIP65			; program for lower case
+	LD R6, HEX41		; Load R6 with x41
+    ADD R6, R6, #-10	; Turned out the drift (bug) was by 10, so -10.
+	ADD R0, R3, R6 		; Add R3 to R6 and OUT
+        OUT				;
+        BRnzp NEXT		; Go to next line
+SKIP65					;
+	LD R6, HEX30		; Same of non skip but for high case letters
+	ADD R0, R3, R6 		; Add R3 to R6 and OUT
 	OUT
 NEXT
-	AND R1, R1, R1
-	BRp BIN_TO_HEX_START
-	LD R0, ENTER
-	OUT
-	BRnzp RESUME
+	AND R1, R1, R1		 	; Gets R1's CC 
+	BRp BIN_TO_HEX_START	; if still positive than do this again
+	LD R0, ENTER			; Change lines
+	OUT						; OUT	
+	BRnzp RESUME			; Resume anyway
 	
 PRINT_HIST
-	AND R0, R0, #0		; init
-	AND R1, R1, #0		;
-	AND R2, R2, #0		;
-	AND R3, R3, #0		;
-	LD  R4, HEX41		;
-	ADD R4, R4, #-1		;
-	LD  R5, HIST_ADDR	;
-	AND R6, R6, #0		;
-	AND R7, R7, #0		;
+	AND R0, R0, #0		; init and reset registers
+	AND R1, R1, #0		; init and reset registers
+	AND R2, R2, #0		; init and reset registers
+	AND R3, R3, #0		; init and reset registers
+	LD  R4, HEX41		; init register
+	ADD R4, R4, #-1		; init register (bug fix--drift by 1)
+	LD  R5, HIST_ADDR	; init register
+	AND R6, R6, #0		; init and reset registers
+	AND R7, R7, #0		; init and reset registers
 LOOP_BACK
-	AND R0, R0, #0		; init
-	AND R1, R1, #0		;
-	AND R2, R2, #0		;
-	AND R3, R3, #0		;
+	AND R0, R0, #0		; init and reset
+	AND R1, R1, #0		; init and reset
+	AND R2, R2, #0		; init and reset
+	AND R3, R3, #0		; init and reset
 	; R4 NOT INCLUDED
 	; R5 NOT INCLUDED
-	AND R6, R6, #0		;
-	AND R7, R7, #0		;
+	AND R6, R6, #0		; init and reset
+	AND R7, R7, #0		; init and reset
 	ADD R0, R4, #0		; print first ascii
-	OUT					;
-	LD R0, SPACE		;
-	OUT					;
-	LD R6, HEX3EC0		;
-	ADD R6, R4, R6		; 
+	OUT					; 
+	LD R0, SPACE		; print the space
+	OUT					; 
+	LD R6, HEX3EC0		; load memory addr (SR) = offset-40+x3F00
+	ADD R6, R4, R6		; finishes above comment
 	LDR R2, R6, #0		; sr definition
-	BRnzp BIN_TO_HEX	; function call
+	BRnzp BIN_TO_HEX	; function call: BinaryToHex(SR)
 
 RESUME
 	ADD R4, R4, #1		; WHILE mechenism
-	LD  R6, HEXM5A		;
-	ADD R6, R4, R6		;
-	BRnz LOOP_BACK		; 
+	LD  R6, HEXM5A		; R6 -= x5A
+	ADD R6, R4, R6		; while offset - 5A < 0: (BRn)
+	BRnz LOOP_BACK		; while offset - 5A < 0: (BRn)
 	BRnzp DONE			; done
 
 
