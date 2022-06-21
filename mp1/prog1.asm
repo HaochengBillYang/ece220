@@ -94,11 +94,12 @@ GET_NEXT
 	ADD R1,R1,#1		; point to next character in string
 	BRnzp COUNTLOOP		; go to start of counting loop
 
+; Intro: the following is written on such premises and logic is based off such pseudocode:
 ; x3F00 # for @ (16 bit binary)
 ; x3F01-x3F1A  # for A-Z (16 bit binary)
 ; write a while loop starting from 40 to 5A (ASCII), 0ffset =40
 ; x4000 string start
-; 
+; pseudo python: 
 ; def Binary to hex(SR):
 ;	counter = 16
 ;	DR = 0
@@ -127,7 +128,6 @@ GET_NEXT
 ; 	SR += SR
 ;	if counter > 0:
 ; 		branch back to start
-
 ; if name == main:
 ; 	while offset - 5A < 0: (BRn)
 ;   	print leading char (offset)
@@ -135,9 +135,10 @@ GET_NEXT
 ; 		load memory addr (SR) = offset-40+x3F00
 ; 		BinaryToHex(SR)
 ;		print newline
-	
+; Resgister definition:	
 ;	print | counter | SR | DR | offset | x3F00 | temp | X  |
 ;   R0	  | R1      | R2 | R3 | R4     | R5    | R6   | R7 |
+; This program uses labels like functions, but with input values being global variables. 
 
 BIN_TO_HEX				; loop is pseudo function definition, intakes R2
 	AND R1, R1, #0		; Init R1 to 16
