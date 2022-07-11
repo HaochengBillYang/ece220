@@ -1,0 +1,30 @@
+Please enter a seed: set_seed: invalid seed
+Please enter a seed: set_seed: invalid seed
+Please enter a seed: set_seed: invalid seed
+Please enter a seed: set_seed: invalid seed
+Please enter a seed: Guess 1
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): With guess 1, you got 0 perfect matches and 1 misplaced matches.
+Guess 2
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): With guess 2, you got 0 perfect matches and 0 misplaced matches.
+Guess 3
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): With guess 3, you got 2 perfect matches and 0 misplaced matches.
+Guess 4
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): With guess 4, you got 1 perfect matches and 2 misplaced matches.
+Guess 5
+Enter your guess (#1 #2 #3 #4): make_guess: invalid guess
+Enter your guess (#1 #2 #3 #4): With guess 5, you got 2 perfect matches and 2 misplaced matches.
+Guess 6
+Enter your guess (#1 #2 #3 #4): With guess 6, you got 4 perfect matches and 0 misplaced matches.
+You guessed correctly in 6 guesses.
