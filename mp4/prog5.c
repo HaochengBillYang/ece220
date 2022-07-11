@@ -1,3 +1,14 @@
+/*
+This is a program that provides functions for main.c. 
+It is eventually a codebreaking game. 
+The three functions written here are:
+1. set_seed -- This function sets the seed value for pseudorandom
+2. start_game -- This function is called by main.c after set_seed but before the user makes guesses.
+3. make_guess -- This function is called by main.c after the user types in a guess.
+Compares user input to randomly generated numbers using a user provided seed.
+*/
+
+
 /*			
  *
  * prog5.c - source file adapted from UIUC ECE198KL Spring 2013 Program 4
@@ -15,7 +26,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "prog5.h"
 
 
@@ -48,6 +58,16 @@ static int solution4;
 int
 set_seed (const char seed_str[])
 {
+int seed;
+char post[2];
+
+if (sscanf (seed_str, "%d%1s", &seed, post) == 1){
+    srand(seed);
+    return 1;
+}else{
+    printf("set_seed: invalid seed\n");
+    return 0;
+}
 //    Example of how to use sscanf to read a single integer and check for anything other than the integer
 //    "int seed" will contain the number typed by the user (if any) and the string "post" will contain anything after the integer
 //    The user should enter only an integer, and nothing else, so we will check that only "seed" is read. 
@@ -62,8 +82,6 @@ set_seed (const char seed_str[])
 //    Check that the return value is 1 to ensure the user enters only an integer. 
 //    Feel free to uncomment these statements, modify them, or delete these comments as necessary. 
 //    You may need to change the return statement below
-   
-    return 0;
 }
 
 
@@ -86,7 +104,15 @@ void
 start_game (int* one, int* two, int* three, int* four)
 {
     //your code here
-    
+    solution1 = rand()%8 + 1;
+    solution2 = rand()%8 + 1;
+    solution3 = rand()%8 + 1;
+    solution4 = rand()%8 + 1;
+    guess_number = 1;
+    *one = solution1;
+    *two = solution2;
+    *three = solution3;
+    *four = solution4;
 }
 
 /*
@@ -115,13 +141,84 @@ start_game (int* one, int* two, int* three, int* four)
 int
 make_guess (const char guess_str[], int* one, int* two, 
 	    int* three, int* four)
-{
+{   
+    int w = 0;
+    int x = 0;
+    int y = 0;
+    int z = 0;
+    int exact = 0;
+    int mismatch = 0;
+    int solutions[4] = {solution1, solution2, solution3, solution4};
+    char post[2];
+    int disable_guess[4] = {0,0,0,0};
+    int disable_solution[4] = {0,0,0,0};
+    int num_success = sscanf (guess_str, "%d%d%d%d%1s", &w, &x, &y, &z, post);
+    if (num_success != 4){
+        printf("make_guess: invalid guess\n");
+        return 0;
+    }
+    if(!(w<9 && w>0 && x<9 && x>0 && y<9 && y>0 && z<9 && z>0))
+    {   
+        printf("make_guess: invalid guess\n");
+        return 0;
+    }
+    *one = w;
+    *two = x;
+    *three = y;
+    *four = z;
+    int guesses[4] = {w,x,y,z};
+    //perfect matches:
+    if(solution1 == *one){
+        exact ++;
+        disable_guess[0] = 1;
+        disable_solution[0] = 1;
+    }
+    if(solution2 == *two){
+        exact ++;
+        disable_guess[1] = 1;
+        disable_solution[1] = 1;
+    }
+    if(solution3 == *three){
+        exact ++;
+        disable_guess[2] = 1;
+        disable_solution[2] = 1;
+    }
+    if(solution4 == *four){
+        exact ++;
+        disable_guess[3] = 1;
+        disable_solution[3] = 1;
+    }
+    //misplaced: outer loop disable guess, inner loop disable solution
+    int outer_loop = 0; // outer loop counter
+    int inner_loop = 0; // inner loop counter
+    while(outer_loop < 4){
+        if(disable_guess[outer_loop] == 0){ 
+            // if outerloop pointer element in guesses is still usable
+            inner_loop = 0;
+            //clear inner loop counter
+            while(inner_loop < 4){
+                //check outer and inner loop usablility
+                if(disable_guess[outer_loop] == 0 && disable_solution[inner_loop] == 0){
+                    if(guesses[outer_loop] == solutions[inner_loop]){
+                        mismatch++; //increment
+                        disable_guess[outer_loop] = 1; // disable matched elements
+                        disable_solution[inner_loop] = 1; // disable matched elements
+                    }
+                }
+            inner_loop++;
+            }
+        }
+        outer_loop++;
+    }
+    printf("With guess %d, you got %d perfect matches and %d misplaced matches.\n", guess_number, exact, mismatch);
+    guess_number++;    
+
 //  One thing you will need to read four integers from the string guess_str, using a process
 //  similar to set_seed
 //  The statement, given char post[2]; and four integers w,x,y,z,
 //  sscanf (guess_str, "%d%d%d%d%1s", &w, &x, &y, &z, post)
 //  will read four integers from guess_str into the integers and read anything else present into post
-//  The return value of sscanf indicates the number of items sucessfully read from the string.
+//  The return value o sfscanf indicates the number of items sucessfully read from the string.
 //  You should check that exactly four integers were sucessfully read.
 //  You should then check if the 4 integers are between 1-8. If so, it is a valid guess
 //  Otherwise, it is invalid.  
